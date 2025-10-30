@@ -38,6 +38,14 @@ class ExpensesViewModel(application: Application) : AndroidViewModel(application
     var accountId by mutableStateOf("")
     var selectedDate: LocalDate? by mutableStateOf(LocalDate.now())
 
+    // Error states
+    var titleError by mutableStateOf<String?>(null)
+    var detailsError by mutableStateOf<String?>(null)
+    var amountError by mutableStateOf<String?>(null)
+    var categoryError by mutableStateOf<String?>(null)
+    var accountError by mutableStateOf<String?>(null)
+    var dateError by mutableStateOf<String?>(null)
+
     fun addOutcome(outcome: Outcome) {
         viewModelScope.launch(Dispatchers.IO) {
             outcomeRepo.addOutcome(outcome)
@@ -57,13 +65,54 @@ class ExpensesViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
+    // Reset form to default
     fun resetForm() {
-        title = "";
-        details = "";
-        amount = "";
-        categoryId = "";
-        accountId = "";
-        selectedDate = "";
+        title = ""
+        details = ""
+        amount = ""
+        categoryId = ""
+        accountId = ""
+        selectedDate = LocalDate.now()
+
+        // Reset errors
+        titleError = null
+        detailsError = null
+        amountError = null
+        categoryError = null
+        accountError = null
+        dateError = null
+    }
+
+    // Form validation
+    fun validateForm(): Boolean {
+        // Validate title
+        titleError = if (title.isBlank()) "Title can't be blank." else null
+
+        // Validate amount (must be a positive number)
+        val amountValue = amount.toDoubleOrNull()
+        amountError = when {
+            amount.isBlank() -> "Amount can't be blank."
+            amountValue == null -> "Enter a valid number."
+            amountValue <= 0.0 -> "Amount must be greater than 0."
+            else -> null
+        }
+
+        // Validate details
+        detailsError = if (details.length < 5) "Details must be at least 5 characters." else null
+
+        // Validate category
+        categoryError = if (categoryId.isBlank()) "Select a category." else null
+
+        // Validate account
+        accountError = if (accountId.isBlank()) "Select an account." else null
+
+        // Validate date
+        dateError = if (selectedDate == null) "Select a valid date." else null
+
+        // Return true if all errors are null
+        return listOf(
+            titleError, amountError, detailsError, categoryError, accountError, dateError
+        ).all { it == null }
     }
 
 }

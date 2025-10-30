@@ -14,19 +14,19 @@ abstract class OutcomeDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract suspend fun addOutcome(outcome: Outcome): Long
 
-    @Query("SELECT * FROM outcomes_table WHERE id = :id")
+    @Query("SELECT * FROM outcomes WHERE id = :id")
     abstract fun getAnOutcomeById(id: String): Flow<Outcome?>
 
-    @Query("SELECT * FROM outcomes_table")
+    @Query("SELECT * FROM outcomes")
     abstract fun getAllOutcomes(): Flow<List<Outcome>>
 
     @Update
     abstract suspend fun updateOutcome(outcome: Outcome): Int
 
-    @Query("DELETE FROM outcomes_table")
+    @Query("DELETE FROM outcomes")
     abstract suspend fun deleteAllOutcomes(): Int
 
-    @Query("DELETE FROM outcomes_table WHERE id = :id")
+    @Query("DELETE FROM outcomes WHERE id = :id")
     abstract suspend fun deleteOutcomeById(id: String): Int
 
 }

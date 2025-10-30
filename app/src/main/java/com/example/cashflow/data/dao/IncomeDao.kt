@@ -14,19 +14,19 @@ abstract class IncomeDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract suspend fun addIncome(income: Income): Long
 
-    @Query("SELECT * FROM incomes_table WHERE id = :id")
+    @Query("SELECT * FROM incomes WHERE id = :id")
     abstract fun getAnIncomeById(id: String): Flow<Income?>
 
-    @Query("SELECT * FROM incomes_table")
+    @Query("SELECT * FROM incomes")
     abstract fun getAllIncomes(): Flow<List<Income>>
 
     @Update
     abstract suspend fun updateIncome(income: Income): Int
 
-    @Query("DELETE FROM incomes_table")
+    @Query("DELETE FROM incomes")
     abstract suspend fun deleteAllIncomes(): Int
 
-    @Query("DELETE FROM incomes_table WHERE id = :id")
+    @Query("DELETE FROM incomes WHERE id = :id")
     abstract suspend fun deleteIncomeById(id: String): Int
 
 }

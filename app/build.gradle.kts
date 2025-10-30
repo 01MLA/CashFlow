@@ -75,6 +75,11 @@ dependencies {
     // dataStore
     implementation(libs.androidx.datastore.preferences)
 
+    // Shimmer effect
+    implementation(libs.compose.shimmer)
+
+    implementation(libs.coil.compose)
+
     //-------------------------------------------------------------------
 
     implementation(libs.androidx.core.ktx)

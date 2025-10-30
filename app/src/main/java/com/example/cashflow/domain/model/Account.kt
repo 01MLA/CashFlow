@@ -3,14 +3,10 @@ package com.example.cashflow.domain.model
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "incomes")
-data class Income(
+@Entity(tableName = "accounts")
+data class Account(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val title: String,
-    val amount: Double,
-    val details: String,
-    val categoryId: Int,
-    val accountId: Int,
-    val date: String
+    val balance: Double
 )

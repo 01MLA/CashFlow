@@ -23,9 +23,7 @@ import com.example.cashflow.presentation.ui.transactions.NewExpenseScreen
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NavGraph(
-    navController: NavHostController,
-    startDestination: String,
-    innerPaddings: PaddingValues
+    navController: NavHostController, startDestination: String, innerPaddings: PaddingValues
 ) {
     NavHost(navController = navController, startDestination = startDestination) {
         navigation(
@@ -46,11 +44,11 @@ fun NavGraph(
             }
             composable(route = Route.NewEarningScreen.route) {
                 val viewModel: EarningsViewModel = viewModel()
-                NewEarningScreen({}, viewModel)
+                NewEarningScreen(viewModel = viewModel)
             }
             composable(route = Route.NewExpenseScreen.route) {
                 val viewModel: ExpensesViewModel = viewModel()
-                NewExpenseScreen({}, viewModel)
+                NewExpenseScreen(viewModel = viewModel)
             }
             composable(route = Route.EarningsScreen.route) {
                 val viewModel: EarningsViewModel = viewModel()

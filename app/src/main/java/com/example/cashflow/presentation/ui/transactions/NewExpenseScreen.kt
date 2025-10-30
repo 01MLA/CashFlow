@@ -49,7 +49,7 @@ import java.time.format.FormatStyle
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun NewExpenseScreen(onCancelClicked: () -> Unit, viewModel: ExpensesViewModel) {
+fun NewExpenseScreen(onCancelClicked: () -> Unit = {}, viewModel: ExpensesViewModel) {
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = viewModel.selectedDate?.atStartOfDay(ZoneId.systemDefault())
             ?.toInstant()?.toEpochMilli()
@@ -78,6 +78,13 @@ fun NewExpenseScreen(onCancelClicked: () -> Unit, viewModel: ExpensesViewModel) 
             placeholder = { Text("e.g. Salary", color = MaterialTheme.colorScheme.outline) },
         )
         CashFlowTextField(
+            value = viewModel.amount,
+            onValueChange = { viewModel.amount = it },
+            label = { Text("Amount") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            placeholder = { Text("e.g. 12000", color = MaterialTheme.colorScheme.outline) },
+        )
+        CashFlowTextField(
             value = viewModel.details,
             onValueChange = { viewModel.details = it },
             label = { Text("Details") },
@@ -87,13 +94,6 @@ fun NewExpenseScreen(onCancelClicked: () -> Unit, viewModel: ExpensesViewModel) 
                     "e.g. January salary", color = MaterialTheme.colorScheme.outline
                 )
             },
-        )
-        CashFlowTextField(
-            value = viewModel.amount,
-            onValueChange = { viewModel.amount = it },
-            label = { Text("Amount") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            placeholder = { Text("e.g. 12000", color = MaterialTheme.colorScheme.outline) },
         )
         CashFlowTextField(
             value = viewModel.categoryId,
@@ -143,16 +143,19 @@ fun NewExpenseScreen(onCancelClicked: () -> Unit, viewModel: ExpensesViewModel) 
             }
             Spacer(modifier = Modifier.width(16.dp))
             CashFlowButton(onClick = {
-                val newOutcome = Outcome(
-                    title = viewModel.title,
-                    details = viewModel.details,
-                    amount = viewModel.amount.toDouble(),
-                    categoryId = viewModel.categoryId,
-                    accountId = viewModel.accountId,
-                    date = viewModel.selectedDate.toString(),
-                )
-                viewModel.addOutcome(newOutcome)
-                viewModel.loadOutcomes() // update outcomes
+                if (viewModel.validateForm()) {
+                    val newOutcome = Outcome(
+                        title = viewModel.title,
+                        details = viewModel.details,
+                        amount = viewModel.amount.toDouble(),
+                        categoryId = viewModel.categoryId.toInt(),
+                        accountId = viewModel.accountId.toInt(),
+                        date = viewModel.selectedDate.toString(),
+                    )
+                    viewModel.addOutcome(newOutcome)
+                    viewModel.resetForm()
+                    viewModel.loadOutcomes() // update outcomes
+                }
             }) {
                 Text(modifier = Modifier.padding(horizontal = 12.dp), text = "Add")
             }

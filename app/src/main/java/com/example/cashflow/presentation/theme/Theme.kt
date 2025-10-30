@@ -75,9 +75,9 @@ private val DarkColorScheme = darkColorScheme(
 
 @Composable
 fun CashFlowTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = false, content: @Composable () -> Unit
+    darkTheme: Boolean = isSystemInDarkTheme()/* Dynamic color is available on Android 12+ */,
+    dynamicColor: Boolean = false,
+    content: @Composable () -> Unit
 ) {
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {

@@ -4,6 +4,6 @@ data class ItemModel(
     val title: String,
     val details: String,
     val amount: Double,
-    val category: String,
+    val categoryId: Int,
     val date: String
 )
