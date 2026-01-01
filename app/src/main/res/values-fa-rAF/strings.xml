@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">جریان پولی</string>
+    <string name="no_data_available">No data available</string>
+    <string name="home">خانه</string>
+    <string name="cashflow_balance">موجودی حساب</string>
+    <string name="currency">افغانی</string>
+    <string name="earnings">درآمد</string>
+    <string name="expenses">مصارف</string>
+    <string name="recent_transactions">تراکنش‌های اخیر</string>
+    <string name="total">"مجموع: %1$s "</string>
+    <string name="delete_income">حذف درآمد</string>
+    <string name="are_you_sure_to_delete_this_income">آیا مطمئن هستید که میخواهید این درآمد حذف شود؟</string>
+    <string name="edit">ویرایش</string>
+    <string name="delete">حذف</string>
+    <string name="delete_expense">حذف مصرف</string>
+    <string name="are_you_sure_to_delete_this_expense">آیا مطمئن هستید که میخواهید این مصرف حذف شود؟</string>
+    <string name="yes">بلی</string>
+    <string name="no">نخیر</string>
+    <string name="add_new_expense">اضافه کردن مصرف جدید</string>
+</resources>

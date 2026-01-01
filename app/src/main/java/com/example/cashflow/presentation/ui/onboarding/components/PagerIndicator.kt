@@ -12,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import com.example.cashflow.presentation.Dimens.IndicatorSize
-import com.example.cashflow.presentation.theme.BlueGray
 
 @Composable
 fun PagerIndicator(
@@ -20,7 +19,7 @@ fun PagerIndicator(
     pageSize: Int,
     selectedPage: Int,
     selectedColor: Color = MaterialTheme.colorScheme.primary,
-    unselectedColor: Color = BlueGray
+    unselectedColor: Color = MaterialTheme.colorScheme.secondary,
 ) {
     Row(modifier = modifier, Arrangement.SpaceBetween) {
         repeat(pageSize) { page ->

@@ -1,9 +1,15 @@
 package com.example.cashflow.presentation.ui.transactions
 
-import android.os.Build
-import androidx.annotation.RequiresApi
+import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,26 +37,33 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusTarget
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cashflow.R
-import com.example.cashflow.domain.model.Outcome
+import com.example.cashflow.domain.model.Expense
 import com.example.cashflow.presentation.components.CashFlowButton
+import com.example.cashflow.presentation.components.CashFlowSelector
 import com.example.cashflow.presentation.components.CashFlowTextField
 import com.example.cashflow.presentation.components.OutlinedCashFlowButton
+import com.example.cashflow.presentation.shimmerEffect
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NewExpenseScreen(onCancelClicked: () -> Unit = {}, viewModel: ExpensesViewModel) {
+    val context = LocalContext.current
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = viewModel.selectedDate?.atStartOfDay(ZoneId.systemDefault())
             ?.toInstant()?.toEpochMilli()
@@ -64,70 +78,99 @@ fun NewExpenseScreen(onCancelClicked: () -> Unit = {}, viewModel: ExpensesViewMo
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        Image(painter = painterResource(R.drawable.app_logo), contentDescription = null)
+        Image(
+            painter = painterResource(R.drawable.receipt),
+            contentDescription = null,
+            modifier = Modifier.size(100.dp)
+        )
         Text(
-            "Add new income.",
+            stringResource(R.string.add_new_expense),
             color = MaterialTheme.colorScheme.outline,
             style = MaterialTheme.typography.titleMedium
         )
         CashFlowTextField(
             value = viewModel.title,
             onValueChange = { viewModel.title = it },
-            label = { Text("Title") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            placeholder = { Text("e.g. Salary", color = MaterialTheme.colorScheme.outline) },
+            label = { Text(stringResource(R.string.title)) },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Text,
+                capitalization = KeyboardCapitalization.Words,
+                imeAction = ImeAction.Next
+            ),
+            placeholder = { Text(stringResource(R.string.e_g_salary), color = MaterialTheme.colorScheme.outline) },
+            isError = viewModel.titleError != null,
+            singleLine = true
         )
         CashFlowTextField(
             value = viewModel.amount,
             onValueChange = { viewModel.amount = it },
-            label = { Text("Amount") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            placeholder = { Text("e.g. 12000", color = MaterialTheme.colorScheme.outline) },
+            label = { Text(stringResource(R.string.amount)) },
+            placeholder = { Text(stringResource(R.string.e_g_12000), color = MaterialTheme.colorScheme.outline) },
+            isError = viewModel.amountError != null,
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number, imeAction = ImeAction.Next
+            )
         )
         CashFlowTextField(
             value = viewModel.details,
             onValueChange = { viewModel.details = it },
-            label = { Text("Details") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+            label = { Text(stringResource(R.string.details)) },
             placeholder = {
-                Text(
-                    "e.g. January salary", color = MaterialTheme.colorScheme.outline
-                )
+                Text(stringResource(R.string.e_g_january_salary), color = MaterialTheme.colorScheme.outline)
             },
+            isError = viewModel.detailsError != null,
+            maxLines = 3,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Text, imeAction = ImeAction.Next
+            ),
         )
-        CashFlowTextField(
-            value = viewModel.categoryId,
-            onValueChange = { viewModel.categoryId = it },
-            label = { Text("Category") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            placeholder = { Text("e.g. Income", color = MaterialTheme.colorScheme.outline) },
+        CashFlowSelector(
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusTarget(),
+            items = viewModel.categories.value.map { it.title },
+            selectedItem = viewModel.selectedCategory,
+            onItemSelected = {
+                viewModel.selectedCategory = it
+            },
+            isError = viewModel.categoryError != null,
         )
-        CashFlowTextField(
-            value = viewModel.accountId,
-            onValueChange = { viewModel.accountId = it },
-            label = { Text("Account") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            placeholder = { Text("e.g. Credit Card", color = MaterialTheme.colorScheme.outline) },
+        CashFlowSelector(
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusTarget(),
+            items = viewModel.accounts.value.map { it.title },
+            selectedItem = viewModel.selectedAccount,
+            onItemSelected = { viewModel.selectedAccount = it },
+            isError = viewModel.categoryError != null
         )
-
         CashFlowTextField(
             value = viewModel.selectedDate?.format(
-                DateTimeFormatter.ofLocalizedDate(
-                    FormatStyle.FULL
-                )
-            ) ?: "",
+            DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
+        ) ?: "",
             onValueChange = { },
-            label = { Text("Date") },
-            placeholder = { Text("e.g. 07/09/2025", color = MaterialTheme.colorScheme.outline) },
+            label = { Text(stringResource(R.string.date)) },
+            placeholder = { Text(stringResource(R.string.e_g_07_09_2025), color = MaterialTheme.colorScheme.outline) },
             trailingIcon = {
                 IconButton(onClick = { viewModel.showDateDialog = !viewModel.showDateDialog }) {
                     Icon(imageVector = Icons.Outlined.CalendarMonth, contentDescription = null)
                 }
             },
+            isError = viewModel.dateError != null,
             readOnly = true
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(8.dp))
+
+        AnimatedVisibility(visible = !viewModel.formErrorMessage.isNullOrEmpty()) {
+            Text(
+                modifier = Modifier.padding(vertical = 12.dp),
+                text = viewModel.formErrorMessage ?: "",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.error
+            )
+        }
 
         Row(
             modifier = Modifier
@@ -138,70 +181,189 @@ fun NewExpenseScreen(onCancelClicked: () -> Unit = {}, viewModel: ExpensesViewMo
         ) {
             OutlinedCashFlowButton(onClick = {
                 onCancelClicked()
+                viewModel.resetForm()
             }) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
             Spacer(modifier = Modifier.width(16.dp))
             CashFlowButton(onClick = {
                 if (viewModel.validateForm()) {
-                    val newOutcome = Outcome(
+                    val newExpense = Expense(
                         title = viewModel.title,
                         details = viewModel.details,
-                        amount = viewModel.amount.toDouble(),
-                        categoryId = viewModel.categoryId.toInt(),
-                        accountId = viewModel.accountId.toInt(),
+                        amount = viewModel.amount.toDoubleOrNull() ?: 0.0,
+                        categoryId = viewModel.categories.value.find {
+                            it.title == viewModel.selectedCategory
+                        }?.id ?: 0,
+                        accountId = viewModel.accounts.value.find {
+                            it.title == viewModel.selectedAccount
+                        }?.id ?: 0,
                         date = viewModel.selectedDate.toString(),
                     )
-                    viewModel.addOutcome(newOutcome)
+                    viewModel.addExpense(newExpense)
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.your_new_expense_has_been_added_successfully), Toast.LENGTH_SHORT
+                    ).show()
                     viewModel.resetForm()
-                    viewModel.loadOutcomes() // update outcomes
+                    viewModel.loadExpenses() // update expenses
                 }
             }) {
-                Text(modifier = Modifier.padding(horizontal = 12.dp), text = "Add")
+                Text(modifier = Modifier.padding(horizontal = 4.dp), text = stringResource(R.string.add_expense))
             }
         }
 
+        // show date dialog
         if (viewModel.showDateDialog) {
-            DatePickerDialog(
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.padding(16.dp),
-                onDismissRequest = { viewModel.showDateDialog = false },
-                confirmButton = {
-                    TextButton(
-                        modifier = Modifier.padding(16.dp), onClick = {
+            AnimatedVisibility(
+                visible = true,
+                enter = fadeIn() + scaleIn(initialScale = 0.9f),
+                exit = fadeOut() + scaleOut(targetScale = 0.9f)
+            ) {
+                DatePickerDialog(
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.padding(16.dp),
+                    onDismissRequest = { viewModel.showDateDialog = false },
+                    confirmButton = {
+                        TextButton(
+                            modifier = Modifier.padding(16.dp), onClick = {
+                                viewModel.showDateDialog = false
+                                datePickerState.selectedDateMillis?.let { millis ->
+                                    viewModel.selectedDate =
+                                        Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault())
+                                            .toLocalDate()
+                                }
+                            }) {
+                            Text(stringResource(R.string.select), fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(modifier = Modifier.padding(16.dp), onClick = {
                             viewModel.showDateDialog = false
-                            datePickerState.selectedDateMillis?.let { millis ->
-                                viewModel.selectedDate =
-                                    Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault())
-                                        .toLocalDate()
-                            }
+                            datePickerState.selectedDateMillis =
+                                LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()
+                                    .toEpochMilli() // today's date
                         }) {
-                        Text("Select", fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                    }
-                },
-                dismissButton = {
-                    TextButton(modifier = Modifier.padding(16.dp), onClick = {
-                        viewModel.showDateDialog = false
-                        datePickerState.selectedDateMillis =
-                            LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()
-                                .toEpochMilli() // today's date
+                            Text(
+                                text = stringResource(R.string.today),
+                                style = MaterialTheme.typography.titleSmall,
+                                color = Color.Blue
+                            )
+                        }
                     }) {
-                        Text(
-                            "Today", style = MaterialTheme.typography.titleSmall, color = Color.Blue
-                        )
-                    }
-                }) {
-                DatePicker(
-                    datePickerState, title = {
-                        Text(
-                            text = "Pick a date.",
-                            fontWeight = FontWeight.Bold,
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.padding(top = 24.dp, start = 24.dp)
-                        )
-                    })
+                    DatePicker(
+                        datePickerState, title = {
+                            Text(
+                                text = stringResource(R.string.pick_a_date),
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(top = 24.dp, start = 24.dp)
+                            )
+                        })
+                }
             }
         }
+    }
 
+}
+
+@Composable
+fun NewExpenseScreenShimmer() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
+            .verticalScroll(rememberScrollState())
+            .imePadding(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // Image placeholder
+        Box(
+            modifier = Modifier
+                .size(100.dp)
+                .shimmerEffect(true)
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = RoundedCornerShape(12.dp)
+                )
+        )
+
+        // Title text placeholder
+        Box(
+            modifier = Modifier
+                .height(24.dp)
+                .fillMaxWidth(0.6f)
+                .shimmerEffect(true)
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = RoundedCornerShape(6.dp)
+                )
+        )
+
+        // TextField placeholders (Title, Amount, Details)
+        repeat(3) {
+            Box(
+                modifier = Modifier
+                    .height(if (it == 2) 60.dp else 48.dp)
+                    .fillMaxWidth()
+                    .shimmerEffect(true)
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(8.dp)
+                    )
+            )
+        }
+
+        // Selector placeholders (Category & Account)
+        repeat(2) {
+            Box(
+                modifier = Modifier
+                    .height(48.dp)
+                    .fillMaxWidth()
+                    .shimmerEffect(true)
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(8.dp)
+                    )
+            )
+        }
+
+        // Date picker placeholder
+        Box(
+            modifier = Modifier
+                .height(48.dp)
+                .fillMaxWidth()
+                .shimmerEffect(true)
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = RoundedCornerShape(8.dp)
+                )
+        )
+
+        // Buttons placeholder
+        Row(
+            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .height(48.dp)
+                    .weight(1f)
+                    .shimmerEffect(true)
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+            )
+            Box(
+                modifier = Modifier
+                    .height(48.dp)
+                    .weight(1f)
+                    .shimmerEffect(true)
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+            )
+        }
     }
 }

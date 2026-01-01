@@ -21,9 +21,11 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.cashflow.R
 import com.example.cashflow.presentation.navigation.Route
 import com.example.cashflow.presentation.ui.home.model.BottomItem
 
@@ -35,19 +37,19 @@ fun MyAppBottomBar(navController: NavController) {
     val bottomBarItems = listOf(
         BottomItem(
             0,
-            "Home",
+            stringResource(R.string.home),
             route = Route.HomeScreen.route,
             icon = if (selectedIndex == 0) Icons.Filled.Home else Icons.Outlined.Home
         ),
         BottomItem(
             1,
-            "Earnings",
+            stringResource(R.string.earnings),
             route = Route.EarningsScreen.route,
             icon = if (selectedIndex == 0) Icons.Filled.AttachMoney else Icons.Outlined.AttachMoney
         ),
         BottomItem(
             2,
-            "Expenses",
+            stringResource(R.string.expenses),
             route = Route.ExpensesScreen.route,
             icon = if (selectedIndex == 0) Icons.Filled.MoneyOff else Icons.Outlined.MoneyOff
         ),

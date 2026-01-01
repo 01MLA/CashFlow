@@ -20,7 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.cashflow.R
 import com.example.cashflow.presentation.Dimens.MediumPadding1
 import com.example.cashflow.presentation.Dimens.MediumPadding2
-import com.example.cashflow.presentation.theme.CashFlowTheme
+import com.example.cashflow.presentation.ui.theme.CashFlowTheme
 import com.example.cashflow.presentation.ui.onboarding.Page
 import com.example.cashflow.presentation.ui.onboarding.pages
 

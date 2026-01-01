@@ -7,12 +7,11 @@ class IncomeRepository(private val incomeDao: IncomeDao) {
     suspend fun addIncome(income: Income) = incomeDao.addIncome(income)
 
     fun getIncomes() = incomeDao.getAllIncomes()
-
-    suspend fun getAnIncomeById(id: String) = incomeDao.getAnIncomeById(id)
+    suspend fun getAnIncomeById(id: Int) = incomeDao.getAnIncomeById(id)
 
     suspend fun updateIncome(income: Income) = incomeDao.updateIncome(income)
 
-    suspend fun deleteAnIncome(id: String) = incomeDao.deleteIncomeById(id)
+    suspend fun deleteAnIncome(id: Int) = incomeDao.deleteIncomeById(id)
 
     suspend fun deleteAllIncomes() = incomeDao.deleteAllIncomes()
 

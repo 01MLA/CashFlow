@@ -15,7 +15,7 @@ abstract class IncomeDao {
     abstract suspend fun addIncome(income: Income): Long
 
     @Query("SELECT * FROM incomes WHERE id = :id")
-    abstract fun getAnIncomeById(id: String): Flow<Income?>
+    abstract fun getAnIncomeById(id: Int): Flow<Income?>
 
     @Query("SELECT * FROM incomes")
     abstract fun getAllIncomes(): Flow<List<Income>>
@@ -27,6 +27,6 @@ abstract class IncomeDao {
     abstract suspend fun deleteAllIncomes(): Int
 
     @Query("DELETE FROM incomes WHERE id = :id")
-    abstract suspend fun deleteIncomeById(id: String): Int
+    abstract suspend fun deleteIncomeById(id: Int): Int
 
 }

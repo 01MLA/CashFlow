@@ -1,4 +1,34 @@
 <resources>
     <string name="app_name">CashFlow</string>
     <string name="no_data_available">No data available</string>
+    <string name="home">Home</string>
+    <string name="cashflow_balance">CashFlow Balance</string>
+    <string name="currency">$</string>
+    <string name="earnings">Earnings</string>
+    <string name="expenses">Expenses</string>
+    <string name="recent_transactions">Recent Transactions</string>
+    <string name="total">"Total: %1$s "</string>
+    <string name="delete_income">Delete Income</string>
+    <string name="are_you_sure_to_delete_this_income">Are you sure to delete this income?</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="delete_expense">Delete Expense</string>
+    <string name="are_you_sure_to_delete_this_expense">Are you sure to delete this expense?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="add_new_expense">Add new expense.</string>
+    <string name="e_g_salary">e.g. Salary</string>
+    <string name="amount">Amount</string>
+    <string name="e_g_12000">e.g. 12000</string>
+    <string name="title">Title</string>
+    <string name="details">Details</string>
+    <string name="e_g_january_salary">e.g. January salary</string>
+    <string name="date">Date</string>
+    <string name="e_g_07_09_2025">e.g. 07/09/2025</string>
+    <string name="cancel">Cancel</string>
+    <string name="your_new_expense_has_been_added_successfully">Your new expense has been added successfully!</string>
+    <string name="add_expense">Add Expense</string>
+    <string name="select">Select</string>
+    <string name="today">Today</string>
+    <string name="pick_a_date">Pick a date.</string>
 </resources>

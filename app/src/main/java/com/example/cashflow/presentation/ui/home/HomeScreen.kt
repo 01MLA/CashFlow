@@ -1,14 +1,13 @@
 package com.example.cashflow.presentation.ui.home
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.navigation.NavController
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
-fun HomeScreen(navController: NavController) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        HomeDashboard()
-    }
+fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
+    val incomes by viewModel.incomes.collectAsState()
+    val expenses by viewModel.expenses.collectAsState()
+    HomeDashboard(incomes = incomes, expenses = expenses)
 }

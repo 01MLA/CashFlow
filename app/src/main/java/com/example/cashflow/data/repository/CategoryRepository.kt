@@ -5,11 +5,11 @@ import com.example.cashflow.domain.model.Category
 
 class CategoryRepository(private val categoryDao: CategoryDao) {
     suspend fun addCategory(category: Category) = categoryDao.addCategory(category)
-    fun getCategoryById(title: String) = categoryDao.getCategoryId(title)
+    suspend fun getCategoryId(title: String) = categoryDao.getCategoryId(title)
 
-    fun getCategories() = categoryDao.getAllCategories()
+    suspend fun getCategories() = categoryDao.getAllCategories()
 
-    fun getACategoryById(id: String) = categoryDao.getACategoryById(id)
+    suspend fun getACategoryById(id: Int) = categoryDao.getACategoryById(id)
 
     suspend fun updateCategory(category: Category) = categoryDao.updateCategory(category)
 

@@ -1,7 +1,5 @@
 package com.example.cashflow.presentation.navigation
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -11,8 +9,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.example.cashflow.presentation.ui.home.HomeScreen
+import com.example.cashflow.presentation.ui.home.HomeViewModel
 import com.example.cashflow.presentation.ui.onboarding.OnBoardingScreen
 import com.example.cashflow.presentation.ui.onboarding.OnBoardingViewModel
+import com.example.cashflow.presentation.ui.settings.SettingsScreen
 import com.example.cashflow.presentation.ui.transactions.EarningsScreen
 import com.example.cashflow.presentation.ui.transactions.EarningsViewModel
 import com.example.cashflow.presentation.ui.transactions.ExpensesScreen
@@ -20,10 +20,9 @@ import com.example.cashflow.presentation.ui.transactions.ExpensesViewModel
 import com.example.cashflow.presentation.ui.transactions.NewEarningScreen
 import com.example.cashflow.presentation.ui.transactions.NewExpenseScreen
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NavGraph(
-    navController: NavHostController, startDestination: String, innerPaddings: PaddingValues
+    navController: NavHostController, startDestination: String, innerPaddings: PaddingValues,
 ) {
     NavHost(navController = navController, startDestination = startDestination) {
         navigation(
@@ -35,12 +34,13 @@ fun NavGraph(
             }
         }
 
-        // Navigation of rest of the app
+        // Navigation graph for the rest of the app
         navigation(
             route = Route.CashFlowNavigation.route, startDestination = Route.HomeScreen.route
         ) {
             composable(route = Route.HomeScreen.route) {
-                HomeScreen(navController)
+                val viewModel: HomeViewModel = viewModel()
+                HomeScreen(viewModel)
             }
             composable(route = Route.NewEarningScreen.route) {
                 val viewModel: EarningsViewModel = viewModel()
@@ -58,7 +58,9 @@ fun NavGraph(
                 val viewModel: ExpensesViewModel = viewModel()
                 ExpensesScreen(innerPaddings, viewModel)
             }
+            composable(route = Route.SettingsScreen.route) {
+                SettingsScreen()
+            }
         }
-
     }
 }

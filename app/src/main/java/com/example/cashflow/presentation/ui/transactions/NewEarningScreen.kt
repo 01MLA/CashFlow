@@ -1,7 +1,6 @@
 package com.example.cashflow.presentation.ui.transactions
 
-import android.os.Build
-import androidx.annotation.RequiresApi
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -38,7 +37,9 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusTarget
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -59,9 +60,9 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NewEarningScreen(onCancelClicked: () -> Unit = {}, viewModel: EarningsViewModel) {
+    val context = LocalContext.current
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = viewModel.selectedDate?.atStartOfDay(ZoneId.systemDefault())
             ?.toInstant()?.toEpochMilli()
@@ -121,17 +122,23 @@ fun NewEarningScreen(onCancelClicked: () -> Unit = {}, viewModel: EarningsViewMo
             maxLines = 3,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text, imeAction = ImeAction.Next
-            )
+            ),
         )
         CashFlowSelector(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusTarget(),
             items = viewModel.categories.value.map { it.title },
             selectedItem = viewModel.selectedCategory,
-            onItemSelected = { viewModel.selectedCategory = it },
-            isError = viewModel.categoryError != null
+            onItemSelected = {
+                viewModel.selectedCategory = it
+            },
+            isError = viewModel.categoryError != null,
         )
         CashFlowSelector(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusTarget(),
             items = viewModel.accounts.value.map { it.title },
             selectedItem = viewModel.selectedAccount,
             onItemSelected = { viewModel.selectedAccount = it },
@@ -139,8 +146,8 @@ fun NewEarningScreen(onCancelClicked: () -> Unit = {}, viewModel: EarningsViewMo
         )
         CashFlowTextField(
             value = viewModel.selectedDate?.format(
-            DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
-        ) ?: "",
+                DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
+            ) ?: "",
             onValueChange = { },
             label = { Text("Date") },
             placeholder = { Text("e.g. 07/09/2025", color = MaterialTheme.colorScheme.outline) },
@@ -193,14 +200,18 @@ fun NewEarningScreen(onCancelClicked: () -> Unit = {}, viewModel: EarningsViewMo
                         date = viewModel.selectedDate.toString(),
                     )
                     viewModel.addIncome(newIncome)
+                    Toast.makeText(
+                        context, "Your new income has been added successfully!", Toast.LENGTH_SHORT
+                    ).show()
                     viewModel.resetForm()
                     viewModel.loadIncomes() // update incomes
                 }
             }) {
-                Text(modifier = Modifier.padding(horizontal = 12.dp), text = "Add")
+                Text(modifier = Modifier.padding(horizontal = 4.dp), text = "Add Income")
             }
         }
 
+        // show date dialog
         if (viewModel.showDateDialog) {
             AnimatedVisibility(
                 visible = true,

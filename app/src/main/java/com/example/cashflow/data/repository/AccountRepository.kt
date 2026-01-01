@@ -13,7 +13,7 @@ class AccountRepository(private val accountDao: AccountDao) {
 
     suspend fun updateAccount(account: Account) = accountDao.updateAccount(account)
 
-    suspend fun deleteAnAccount(id: String) = accountDao.deleteAccountById(id)
+    suspend fun deleteAccount(id: String) = accountDao.deleteAccountById(id)
 
     suspend fun deleteAllAccounts() = accountDao.deleteAllAccounts()
 }

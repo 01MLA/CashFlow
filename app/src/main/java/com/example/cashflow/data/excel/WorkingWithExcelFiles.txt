@@ -1,0 +1,146 @@
+package com.example.cashflow.data.excel
+
+import android.content.Context
+import android.os.Environment
+import com.example.cashflow.domain.model.Income
+import com.example.cashflow.domain.model.Transaction
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.Collections.emptyList
+import java.util.Date
+import java.util.Locale
+
+fun importEarnings(file: File): MutableList<Income> {
+    try {
+        val incomes = mutableListOf<Income>()
+        val inputStream = FileInputStream(file)
+        val workbook = XSSFWorkbook(inputStream)
+        val sheet = workbook.getSheetAt(0)
+        sheet.drop(1).forEach { row -> // skip header
+            val id = row.getCell(0).numericCellValue.toInt()
+            val title = row.getCell(1).stringCellValue.toString()
+            val details = row.getCell(2).stringCellValue.toString()
+            val amount = row.getCell(3).numericCellValue
+            val categoryId = row.getCell(4).numericCellValue.toInt()
+            val accountId = row.getCell(5).numericCellValue.toInt()
+            val dateStr = formatDate(row.getCell(6).dateCellValue)
+            incomes.add(
+                Income(
+                    id = id,
+                    title = title,
+                    details = details,
+                    amount = amount,
+                    categoryId = categoryId,
+                    accountId = accountId,
+                    date = dateStr
+                )
+            )
+        }
+        workbook.close()
+        inputStream.close()
+        return incomes
+    } catch (e: Exception) {
+        e.printStackTrace()
+        return emptyList()
+    }
+}
+
+fun exportEarningsToExcel(
+    context: Context,
+    transactions: List<Transaction>,
+    categories: Map<Int, String>,
+    accounts: Map<Int, String>,
+) {
+    try {
+        val workbook = XSSFWorkbook()
+        val sheet = workbook.createSheet("Earnings")
+        val headerRow = sheet.createRow(0)
+        val headers = listOf("Id", "Title", "Amount", "Details", "Category", "Account", "Date")
+        headers.forEachIndexed { index, colTitle ->
+            headerRow.createCell(index).setCellValue(colTitle)
+        }
+
+        // Date style
+        val dateStyle = workbook.createCellStyle()
+        dateStyle.dataFormat = workbook.creationHelper.createDataFormat().getFormat("yyyy-MM-dd")
+
+        // Data rows
+        transactions.forEachIndexed { index, income ->
+            val row = sheet.createRow(index + 1)
+            row.createCell(0).setCellValue(income.id.toString())
+            row.createCell(1).setCellValue(income.title)
+            row.createCell(2).setCellValue(income.amount)
+            row.createCell(3).setCellValue(income.details)
+            row.createCell(4).setCellValue(categories[income.id])
+            row.createCell(5).setCellValue(accounts[income.id])
+
+            val dateCell = row.createCell(6)
+            dateCell.setCellValue(income.date)
+            dateCell.cellStyle = dateStyle
+        }
+
+        // 📁 Create folder
+        val folder = File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "Incomes")
+        if (!folder.exists()) folder.mkdirs()
+//        Log.d("logs", "${folder.path}")
+
+        // 📄 Create file
+        val timeStamp = SimpleDateFormat("yyyy-MM-dd_HH-mm", Locale.getDefault()).format(Date())
+        val file = File(folder, "incomes_$timeStamp.xlsx")
+        FileOutputStream(file).use { workbook.write(it) }
+        workbook.close()
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+}
+
+fun exportExpensesToExcel(context: Context, transactions: List<Transaction>) {
+    try {
+        val workbook = XSSFWorkbook()
+        val sheet = workbook.createSheet("Expenses")
+
+        // Header
+        val headers = listOf("Id", "Title", "Amount", "Details", "Category", "Account", "Date")
+
+        val headerRow = sheet.createRow(0)
+        headers.forEachIndexed { index, title ->
+            headerRow.createCell(index).setCellValue(title)
+        }
+
+        // Date style
+        val dateStyle = workbook.createCellStyle()
+        dateStyle.dataFormat = workbook.creationHelper.createDataFormat().getFormat("yyyy-MM-dd")
+
+        // Data rows
+        transactions.forEachIndexed { index, expense ->
+            val row = sheet.createRow(index + 1)
+
+            row.createCell(0).setCellValue(expense.id.toString())
+            row.createCell(1).setCellValue(expense.title)
+            row.createCell(2).setCellValue(expense.amount)
+            row.createCell(3).setCellValue(expense.details)
+            row.createCell(4).setCellValue(expense.categoryId.toString())
+            row.createCell(5).setCellValue(expense.accountId.toString())
+
+            val dateCell = row.createCell(6)
+            dateCell.setCellValue(expense.date) // java.util.Date
+            dateCell.cellStyle = dateStyle
+        }
+
+        // 📁 Create folder
+        val folder = File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "Expenses")
+        if (!folder.exists()) folder.mkdirs()
+//        Log.d("logs", "${folder.path}")
+
+        // 📄 Create file
+        val timeStamp = SimpleDateFormat("yyyy-MM-dd_HH-mm", Locale.getDefault()).format(Date())
+        val file = File(folder, "expenses_$timeStamp.xlsx")
+        FileOutputStream(file).use { workbook.write(it) }
+        workbook.close()
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+}

@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.cashflow.domain.useCases.AppEntryUseCases
 import com.example.cashflow.presentation.navigation.Route
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
@@ -17,17 +16,14 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(appEntryUseCases: AppEntryUseCases) : ViewModel() {
     var splashCondition by mutableStateOf(true)
         private set
-
     var startDestination by mutableStateOf(Route.AppStartNavigation.route)
         private set
 
     init {
-        appEntryUseCases.readAppEntry().onEach { shouldStartFromHomeScreen ->
+        appEntryUseCases.readAppEntry().onEach { startFromHome ->
             startDestination =
-                if (shouldStartFromHomeScreen) Route.CashFlowNavigation.route else Route.AppStartNavigation.route
-            delay(300)
+                if (startFromHome) Route.CashFlowNavigation.route else Route.AppStartNavigation.route
             splashCondition = false
         }.launchIn(viewModelScope)
     }
-
 }

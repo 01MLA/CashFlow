@@ -14,7 +14,7 @@ abstract class AccountDao {
     abstract suspend fun addAccount(account: Account): Long
 
     @Query("SELECT id FROM accounts WHERE title = :title")
-    abstract fun getAccountId(title: String): Int
+    abstract fun getAccountId(title: String): Int?
 
     @Query("SELECT * FROM accounts WHERE id = :id")
     abstract fun getAnAccountById(id: String): Flow<Account?>

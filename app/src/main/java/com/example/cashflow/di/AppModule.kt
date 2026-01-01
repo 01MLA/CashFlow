@@ -1,8 +1,6 @@
 package com.example.cashflow.di
 
 import android.app.Application
-import com.example.cashflow.data.manager.LocalUserManagerImp
-import com.example.cashflow.domain.manager.LocalUserManager
 import com.example.cashflow.domain.useCases.AppEntryUseCases
 import com.example.cashflow.domain.useCases.ReadAppEntry
 import com.example.cashflow.domain.useCases.SaveAppEntry
@@ -17,12 +15,13 @@ import javax.inject.Singleton
 object AppModule {
     @Provides
     @Singleton
-    fun provideLocalUserManager(application: Application): LocalUserManager =
-        LocalUserManagerImp(application)
+    fun provideLocalUserManager(application: Application): LocalUserManager {
+        return LocalUserManager(application)
+    }
 
     @Provides
     @Singleton
-    fun provideAppEntryUseCases(localUserManager: LocalUserManager) = AppEntryUseCases(
-        readAppEntry = ReadAppEntry(localUserManager), saveAppEntry = SaveAppEntry(localUserManager)
-    )
+    fun provideAppEntryUseCases(localUserManager: LocalUserManager): AppEntryUseCases {
+        return AppEntryUseCases(ReadAppEntry(localUserManager), SaveAppEntry(localUserManager))
+    }
 }

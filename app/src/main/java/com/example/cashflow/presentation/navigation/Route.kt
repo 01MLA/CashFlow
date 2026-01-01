@@ -4,6 +4,7 @@ sealed class Route(val route: String) {
     object OnBoardingScreen : Route("onBoarding_screen")
     object HomeScreen : Route("home_screen")
     object SearchScreen : Route("search_screen")
+    object SettingsScreen : Route("settings_screen")
     object DetailsScreen : Route("details_screen")
     object EarningsScreen : Route("earnings_screen")
     object NewEarningScreen : Route("new_earning_screen")

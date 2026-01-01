@@ -5,12 +5,13 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "incomes")
 data class Income(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
-    val title: String,
-    val amount: Double,
-    val details: String,
-    val categoryId: Int,
-    val accountId: Int,
-    val date: String
+    @PrimaryKey(autoGenerate = true) override val id: Int = 0,
+    override val title: String,
+    override val details: String,
+    override val amount: Double,
+    override val categoryId: Int,
+    override val accountId: Int,
+    override val date: String,
+) : Transaction(
+    id, title, details, amount, categoryId, accountId, date, type = TransactionType.INCOME
 )

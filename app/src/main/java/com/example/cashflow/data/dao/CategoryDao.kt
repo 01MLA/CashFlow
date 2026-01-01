@@ -14,10 +14,10 @@ abstract class CategoryDao {
     abstract suspend fun addCategory(category: Category): Long
 
     @Query("SELECT id FROM categories WHERE title = :title")
-    abstract fun getCategoryId(title: String): Int
+    abstract fun getCategoryId(title: String): Int?
 
     @Query("SELECT * FROM categories WHERE id = :id")
-    abstract fun getACategoryById(id: String): Flow<Category?>
+    abstract fun getACategoryById(id: Int): Flow<Category?>
 
     @Query("SELECT * FROM categories")
     abstract fun getAllCategories(): Flow<List<Category>>

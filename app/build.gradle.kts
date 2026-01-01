@@ -12,7 +12,7 @@ android {
     compileSdk = 36
     defaultConfig {
         applicationId = "com.example.cashflow"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -42,6 +42,9 @@ android {
 }
 
 dependencies {
+    // YCharts
+    implementation(libs.ycharts)
+
     // Navigation03
     implementation(libs.androidx.navigation.compose)
 
@@ -78,8 +81,14 @@ dependencies {
     // Shimmer effect
     implementation(libs.compose.shimmer)
 
+    // Coil
     implementation(libs.coil.compose)
 
+    // Apache POI (for working with excel files)
+    implementation(libs.poi)
+    implementation(libs.poi.ooxml.lite)
+    implementation(libs.xmlbeans)
+    implementation(libs.poi.ooxml)  // for XSSF (.xlsx)
     //-------------------------------------------------------------------
 
     implementation(libs.androidx.core.ktx)
