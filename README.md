@@ -40,10 +40,10 @@ The app is built with **Jetpack Compose** and follows **MVVM architecture** with
 
 #### 📸 Screenshots
 
-| ![](screenshots/CashFlow_1.jpg) | ![](screenshots/CashFlow_2.jpg) | ![](screenshots/CashFlow_3.jpg) |
-| ------------------------------- | ------------------------------- | ------------------------------- |
-| ![](screenshots/CashFlow_4.jpg) | ![](screenshots/CashFlow_5.jpg) | ![](screenshots/CashFlow_6.jpg) |
-| ![](screenshots/CashFlow_7.jpg) | ![](screenshots/CashFlow_8.jpg) | ![](screenshots/CashFlow_9.jpg) |
+| ![](screenshots/CashFlow_1_new.jpg) | ![](screenshots/CashFlow_2.jpg) | ![](screenshots/CashFlow_3.jpg) |
+| ----------------------------------- | ------------------------------- | ------------------------------- |
+| ![](screenshots/CashFlow_4.jpg)     | ![](screenshots/CashFlow_5.jpg) | ![](screenshots/CashFlow_6.jpg) |
+| ![](screenshots/CashFlow_7.jpg)     | ![](screenshots/CashFlow_8.jpg) | ![](screenshots/CashFlow_9.jpg) |
 
 ------
 
