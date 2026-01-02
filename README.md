@@ -40,24 +40,10 @@ The app is built with **Jetpack Compose** and follows **MVVM architecture** with
 
 #### 📸 Screenshots
 
-| ![](screenshots\CashFlow (1).jpg) | ![](screenshots\CashFlow (2).jpg) | ![](screenshots\CashFlow (3).jpg) |
-| --------------------------------- | --------------------------------- | --------------------------------- |
-| ![](screenshots\CashFlow (4).jpg) | ![](screenshots\CashFlow (5).jpg) | ![](screenshots\CashFlow (6).jpg) |
-| ![](screenshots\CashFlow (7).jpg) | ![](screenshots\CashFlow (8).jpg) | ![](screenshots\CashFlow (9).jpg) |
-
-------
-
-#### 🚀 Getting Started
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/your-username/cashflow.git
-   ```
-
-2. Open the project in **Android Studio**
-
-3. Sync Gradle and run the app on an emulator or device
+| ![](screenshots/CashFlow_1.jpg) | ![](screenshots/CashFlow_2.jpg) | ![](screenshots/CashFlow_3.jpg) |
+| ------------------------------- | ------------------------------- | ------------------------------- |
+| ![](screenshots/CashFlow_4.jpg) | ![](screenshots/CashFlow_5.jpg) | ![](screenshots/CashFlow_6.jpg) |
+| ![](screenshots/CashFlow_7.jpg) | ![](screenshots/CashFlow_8.jpg) | ![](screenshots/CashFlow_9.jpg) |
 
 ------
 
