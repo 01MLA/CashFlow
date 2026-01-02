@@ -40,10 +40,10 @@ The app is built with **Jetpack Compose** and follows **MVVM architecture** with
 
 #### 📸 Screenshots
 
-| ![](D:\Android Development\Projects\CashFlow\screenshots\CashFlow (1).jpg) | ![](D:\Android Development\Projects\CashFlow\screenshots\CashFlow (2).jpg) | ![](D:\Android Development\Projects\CashFlow\screenshots\CashFlow (3).jpg) |
-| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| ![](D:\Android Development\Projects\CashFlow\screenshots\CashFlow (4).jpg) | ![](D:\Android Development\Projects\CashFlow\screenshots\CashFlow (5).jpg) | ![](D:\Android Development\Projects\CashFlow\screenshots\CashFlow (6).jpg) |
-| ![](D:\Android Development\Projects\CashFlow\screenshots\CashFlow (7).jpg) | ![](D:\Android Development\Projects\CashFlow\screenshots\CashFlow (8).jpg) | ![](D:\Android Development\Projects\CashFlow\screenshots\CashFlow (9).jpg) |
+| ![](screenshots\CashFlow (1).jpg) | ![](screenshots\CashFlow (2).jpg) | ![](screenshots\CashFlow (3).jpg) |
+| --------------------------------- | --------------------------------- | --------------------------------- |
+| ![](screenshots\CashFlow (4).jpg) | ![](screenshots\CashFlow (5).jpg) | ![](screenshots\CashFlow (6).jpg) |
+| ![](screenshots\CashFlow (7).jpg) | ![](screenshots\CashFlow (8).jpg) | ![](screenshots\CashFlow (9).jpg) |
 
 ------
 
