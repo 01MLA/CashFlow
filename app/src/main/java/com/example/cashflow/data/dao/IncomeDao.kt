@@ -14,6 +14,9 @@ abstract class IncomeDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract suspend fun addIncome(income: Income): Long
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    abstract suspend fun addIncomes(incomes: List<Income>): List<Long>
+
     @Query("SELECT * FROM incomes WHERE id = :id")
     abstract fun getAnIncomeById(id: Int): Flow<Income?>
 
@@ -25,6 +28,9 @@ abstract class IncomeDao {
 
     @Query("DELETE FROM incomes")
     abstract suspend fun deleteAllIncomes(): Int
+
+    @Query("DELETE FROM incomes WHERE id IN (:ids)")
+    abstract suspend fun deleteIncomes(ids: List<Int>): Int
 
     @Query("DELETE FROM incomes WHERE id = :id")
     abstract suspend fun deleteIncomeById(id: Int): Int

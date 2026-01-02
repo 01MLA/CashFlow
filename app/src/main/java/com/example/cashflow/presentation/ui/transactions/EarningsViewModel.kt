@@ -21,6 +21,7 @@ import com.example.cashflow.data.repository.IncomeRepository
 import com.example.cashflow.domain.model.Account
 import com.example.cashflow.domain.model.Category
 import com.example.cashflow.domain.model.Income
+import com.example.cashflow.presentation.ui.home.model.LoadingUIState
 import com.example.cashflow.presentation.ui.home.model.UiState
 import com.example.cashflow.presentation.util.getDate
 import com.example.cashflow.presentation.util.getDouble
@@ -28,8 +29,10 @@ import com.example.cashflow.presentation.util.getString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
@@ -42,6 +45,12 @@ class EarningsViewModel(application: Application) : AndroidViewModel(application
     private val incomeRepo = IncomeRepository(database.incomeDao())
     private val categoryRepo = CategoryRepository(database.categoryDao())
     private val accountRepo = AccountRepository(database.accountDao())
+
+    private val _importState = MutableStateFlow<LoadingUIState<Unit>>(LoadingUIState.Idle)
+    val importState = _importState.asStateFlow()
+
+    private val _exportState = MutableStateFlow<LoadingUIState<Unit>>(LoadingUIState.Idle)
+    val exportState = _exportState.asStateFlow()
 
     // these two are declared here because used by more then one screens
     var showNewIncomeSheet by mutableStateOf(false)
@@ -78,7 +87,7 @@ class EarningsViewModel(application: Application) : AndroidViewModel(application
 
     // Form fields
     var title by mutableStateOf("")
-    var amount by mutableStateOf("") // keep as String to bind with TextField
+    var amount by mutableStateOf("")
     var details by mutableStateOf("")
     var category by mutableStateOf("")
     var account by mutableStateOf("")
@@ -109,58 +118,60 @@ class EarningsViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun importEarningsFromExcel(context: Context, uri: Uri) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
+            _importState.value = LoadingUIState.Loading
             val earnings = mutableListOf<Income>()
             val categoryCache = mutableMapOf<String, Int>()
             val accountCache = mutableMapOf<String, Int>()
             try {
-                context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                    val workbook = XSSFWorkbook(inputStream)
-                    val sheet = workbook.getSheetAt(0)
-                    sheet.drop(1).forEach { row ->
-                        val id = row.getCell(0).getString().toIntOrNull() ?: 0
-                        val title = row.getCell(1).getString()
-                        val details = row.getCell(2).getString()
-                        val amount = row.getCell(3).getDouble()
-                        val categoryName = row.getCell(4).getString()
-                        val accountName = row.getCell(5).getString()
-                        val date = row.getCell(6).getDate()?.let { formatDate(it) } ?: ""
+                withContext(Dispatchers.IO) {
+                    context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                        val workbook = XSSFWorkbook(inputStream)
+                        val sheet = workbook.getSheetAt(0)
+                        sheet.drop(1).forEach { row ->
+                            val id = row.getCell(0).getString().toIntOrNull() ?: 0
+                            val title = row.getCell(1).getString()
+                            val details = row.getCell(2).getString()
+                            val amount = row.getCell(3).getDouble()
+                            val categoryName = row.getCell(4).getString()
+                            val accountName = row.getCell(5).getString()
+                            val date = row.getCell(6).getDate()?.let { formatDate(it) } ?: ""
 
-                        val categoryId = categoryCache.getOrPut(categoryName) {
-                            getOrCreateCategoryId(categoryName)
-                        }
-                        val accountId = accountCache.getOrPut(accountName) {
-                            getOrCreateAccountId(accountName)
-                        }
+                            val categoryId = categoryCache.getOrPut(categoryName) {
+                                getOrCreateCategoryId(categoryName)
+                            }
+                            val accountId = accountCache.getOrPut(accountName) {
+                                getOrCreateAccountId(accountName)
+                            }
 
-                        earnings.add(
-                            Income(
-                                id = id,
-                                title = title,
-                                details = details,
-                                amount = amount,
-                                categoryId = categoryId,
-                                accountId = accountId,
-                                date = date
+                            earnings.add(
+                                Income(
+                                    id = id,
+                                    title = title,
+                                    details = details,
+                                    amount = amount,
+                                    categoryId = categoryId,
+                                    accountId = accountId,
+                                    date = date
+                                )
                             )
-                        )
+                        }
+                        workbook.close()
                     }
-                    workbook.close()
+                    saveImportedEarnings(earnings)
                 }
-                saveImportedEarnings(earnings)
+                loadIncomes()
+                _importState.value = LoadingUIState.Success(Unit)
             } catch (e: Exception) {
                 Log.e("logs", "excel import failed", e)
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(context, "Excel import failed: ${e.message}", Toast.LENGTH_LONG)
-                        .show()
-                }
+                _importState.value = LoadingUIState.Error(e, message = "Excel import failed")
             }
         }
     }
 
     suspend fun saveImportedEarnings(earnings: List<Income>) {
         try {
-            earnings.forEach { incomeRepo.addIncome(it) }
+            incomeRepo.addIncomes(earnings)
             withContext(Dispatchers.Main) {
                 Toast.makeText(
                     application,
@@ -224,8 +235,8 @@ class EarningsViewModel(application: Application) : AndroidViewModel(application
                 val categories = mutableMapOf<Int, String>()
                 val accounts = mutableMapOf<Int, String>()
                 earnings.forEach {
-                    categories[it.id] = getCategory(it.id)?.title.orEmpty()
-                    accounts[it.id] = getAccount(it.id)?.title.orEmpty()
+                    categories[it.id] = getCategory(it.categoryId)?.title.orEmpty()
+                    accounts[it.id] = getAccount(it.accountId)?.title.orEmpty()
                 }
                 onResult(earnings, categories, accounts)
             } catch (e: Exception) {
@@ -264,17 +275,22 @@ class EarningsViewModel(application: Application) : AndroidViewModel(application
             row.createCell(1).setCellValue(income.title)
             row.createCell(2).setCellValue(income.details)
             row.createCell(3).setCellValue(income.amount)
-            row.createCell(4).setCellValue(categories[income.categoryId].orEmpty())
-            row.createCell(5).setCellValue(accounts[income.accountId].orEmpty())
+            row.createCell(4).setCellValue(categories[income.id].orEmpty())
+            row.createCell(5).setCellValue(accounts[income.id].orEmpty())
 
             val dateCell = row.createCell(6)
             dateCell.cellStyle = dateCellStyle
             dateCell.setCellValue(income.date)
         }
 
-        for (i in 0 until headers.size) {
-            sheet.autoSizeColumn(i)
-        }
+        // Set column widths
+        sheet.setColumnWidth(0, 5 * 256) // ID
+        sheet.setColumnWidth(1, 25 * 256) // Title
+        sheet.setColumnWidth(2, 35 * 256) // Details
+        sheet.setColumnWidth(3, 10 * 256) // Amount
+        sheet.setColumnWidth(4, 20 * 256) // Category
+        sheet.setColumnWidth(5, 20 * 256) // Account
+        sheet.setColumnWidth(6, 15 * 256) // Date
 
         context.contentResolver.openOutputStream(uri)?.use { outputStream ->
             workbook.write(outputStream)
@@ -293,7 +309,7 @@ class EarningsViewModel(application: Application) : AndroidViewModel(application
     }
 
     // Remove income visually and show undo option
-    fun deleteIncome(id: Int) {
+    fun deleteEarning(id: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             // Get current list from UiState or return if unavailable
             val currList = (incomes.value as? UiState.Success)?.data ?: return@launch
@@ -323,6 +339,46 @@ class EarningsViewModel(application: Application) : AndroidViewModel(application
                 } catch (e: Exception) {
                     e.printStackTrace() // Log any errors during delete operation
                 }
+            }
+        }
+    }
+
+    fun clearIncomesState() {
+        _incomes.value = UiState.Success(emptyList())
+    }
+
+    // To delete a group of earnings at once
+    fun deleteEarnings(ids: List<Int>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                incomeRepo.deleteIncomes(ids) // Delete from DB
+                withContext(Dispatchers.Main) {
+                    clearIncomesState()
+                    Toast.makeText(
+                        application,
+                        "All selected items have been deleted successfully!",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+                loadIncomes()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun deleteAllEarnings() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                incomeRepo.deleteAllIncomes()
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        application, "All items have been deleted successfully!", Toast.LENGTH_LONG
+                    ).show()
+                }
+                loadIncomes()
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }

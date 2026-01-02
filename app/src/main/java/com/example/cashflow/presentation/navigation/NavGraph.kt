@@ -22,7 +22,9 @@ import com.example.cashflow.presentation.ui.transactions.NewExpenseScreen
 
 @Composable
 fun NavGraph(
-    navController: NavHostController, startDestination: String, innerPaddings: PaddingValues,
+    navController: NavHostController,
+    startDestination: String,
+    innerPaddings: PaddingValues,
 ) {
     NavHost(navController = navController, startDestination = startDestination) {
         navigation(

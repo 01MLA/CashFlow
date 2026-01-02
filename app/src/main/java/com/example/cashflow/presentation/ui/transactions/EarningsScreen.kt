@@ -25,12 +25,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Input
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Output
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.DeleteOutline
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -47,13 +49,16 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -73,6 +78,7 @@ import com.example.cashflow.presentation.ui.home.components.CashFlowItem
 import com.example.cashflow.presentation.ui.home.components.CashFlowItemShimmer
 import com.example.cashflow.presentation.ui.home.components.ItemModel
 import com.example.cashflow.presentation.ui.home.model.UiState
+import com.example.cashflow.presentation.util.EarningsMenuAction
 import com.example.cashflow.util.formatMoney
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -86,13 +92,15 @@ import java.util.Locale
 @Composable
 fun EarningsScreen(innerPaddings: PaddingValues, viewModel: EarningsViewModel) {
     val context = LocalContext.current
-    var selectedItems by remember { mutableStateOf<List<Int>>(emptyList()) }
+    val selectedItems = remember { mutableStateListOf<Int>() }
     val incomes: UiState<List<Income>> by viewModel.incomes
     val snackbarHostState = remember { SnackbarHostState() }
     var showDeleteConfirmDialog by remember { mutableStateOf(false) }
     var transactionToShowDetails by remember { mutableIntStateOf(-1) }
     var incomeToEdit by remember { mutableIntStateOf(-1) }
     var incomeToDelete by remember { mutableIntStateOf(-1) }
+    var earningDropDownExpanded by remember { mutableStateOf(false) }
+    val importState = viewModel.importState.collectAsState()
 
     val saveFileLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument(
@@ -117,9 +125,7 @@ fun EarningsScreen(innerPaddings: PaddingValues, viewModel: EarningsViewModel) {
 
     val importExcelLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-            if (uri != null) {
-                viewModel.importEarningsFromExcel(context, uri)
-            }
+            if (uri != null) viewModel.importEarningsFromExcel(context, uri)
         }
 
     LaunchedEffect(Unit) {
@@ -143,13 +149,10 @@ fun EarningsScreen(innerPaddings: PaddingValues, viewModel: EarningsViewModel) {
         }
     }, snackbarHost = { SnackbarHost(snackbarHostState) }) {
         Column(modifier = Modifier.fillMaxSize()) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     stringResource(R.string.earnings),
-                    modifier = Modifier.padding(start = 10.dp),
+                    modifier = Modifier.padding(start = 16.dp),
                     style = MaterialTheme.typography.titleMedium.copy(fontSize = 17.sp),
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -163,29 +166,66 @@ fun EarningsScreen(innerPaddings: PaddingValues, viewModel: EarningsViewModel) {
                     style = MaterialTheme.typography.titleMedium.copy(fontSize = 16.sp),
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.outline,
-                    modifier = Modifier.padding(12.dp, 8.dp)
+                    modifier = Modifier.padding(end = 6.dp)
                 )
-                IconButton(onClick = {
-                    val timeStamp = SimpleDateFormat(
-                        "yyyy-MM-dd_HH-mm", Locale.getDefault()
-                    ).format(Date())
-                    saveFileLauncher.launch("earnings_$timeStamp.xlsx")
-                }) {
+
+                IconButton(
+                    onClick = { earningDropDownExpanded = true }, modifier = Modifier.size(40.dp)
+                ) {
                     Icon(
-                        imageVector = Icons.Default.Output,
+                        imageVector = Icons.Default.MoreVert,
                         contentDescription = "export earnings button",
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
-                IconButton(onClick = {
-                    importExcelLauncher.launch(arrayOf("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-                }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.Input,
-                        contentDescription = "import earnings button",
-                        tint = MaterialTheme.colorScheme.primary
 
-                    )
+                Box {// Used to align the dropdown to top-right:
+                    // DropdownMenu always opens relative to its immediate parent — so give it the right parent.
+                    val items = remember { // remember to not create on recomposition
+                        listOf(
+                            EarningsMenuAction.Import,
+                            EarningsMenuAction.Export,
+                            EarningsMenuAction.Delete
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = earningDropDownExpanded,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp))
+                            .border(
+                                width = 0.1.dp,
+                                color = MaterialTheme.colorScheme.outline,
+                                shape = RoundedCornerShape(16.dp)
+                            ),
+                        onDismissRequest = { earningDropDownExpanded = false }) {
+                        items.forEach { item ->
+                            DropdownMenuItem(leadingIcon = {
+                                Icon(
+                                    imageVector = item.icon,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.outline
+                                )
+                            }, text = { Text(item.title) }, onClick = {
+                                earningDropDownExpanded = false
+                                when (item) {
+                                    EarningsMenuAction.Import -> {
+                                        importExcelLauncher.launch(
+                                            arrayOf("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                                        )
+                                    }
+
+                                    EarningsMenuAction.Export -> {
+                                        val timeStamp = SimpleDateFormat(
+                                            "yyyy-MM-dd_HH-mm", Locale.getDefault()
+                                        ).format(Date())
+                                        saveFileLauncher.launch("Earnings_$timeStamp.xlsx")
+                                    }
+
+                                    EarningsMenuAction.Delete -> viewModel.deleteAllEarnings()
+                                }
+                            })
+                        }
+                    }
                 }
             }
 
@@ -225,11 +265,11 @@ fun EarningsScreen(innerPaddings: PaddingValues, viewModel: EarningsViewModel) {
                         )
                     } else {
                         LazyColumn(
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                            modifier = Modifier.padding(horizontal = 12.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            item {
+                            item {// Selected-Items Delete Button
                                 Column {
                                     if (!selectedItems.isEmpty()) {
                                         AnimatedVisibility(
@@ -238,20 +278,12 @@ fun EarningsScreen(innerPaddings: PaddingValues, viewModel: EarningsViewModel) {
                                             Row(
                                                 modifier = Modifier
                                                     .fillMaxWidth()
-                                                    .padding(vertical = 4.dp),
+                                                    .padding(vertical = 0.dp),
                                                 horizontalArrangement = Arrangement.Center
                                             ) {
                                                 OutlinedButton(onClick = {
-                                                    selectedItems.forEach {
-                                                        viewModel.deleteIncome(it)
-                                                        selectedItems -= it
-                                                    }
-                                                    Toast.makeText(
-                                                        context,
-                                                        "All selected items has been deleted successfully!",
-                                                        Toast.LENGTH_LONG
-                                                    ).show()
-                                                    viewModel.loadIncomes()
+                                                    viewModel.deleteEarnings(selectedItems)
+                                                    selectedItems.clear()
                                                 }) {
                                                     Icon(
                                                         imageVector = Icons.Outlined.DeleteOutline,
@@ -292,11 +324,11 @@ fun EarningsScreen(innerPaddings: PaddingValues, viewModel: EarningsViewModel) {
                             items(theIncomes) { income ->
                                 CashFlowItem(
                                     onClick = {
-                                    if (selectedItems.isEmpty()) transactionToShowDetails =
-                                        income.id
-                                    else if (!selectedItems.contains(income.id)) selectedItems += income.id
-                                    else selectedItems -= income.id
-                                },
+                                        if (selectedItems.isEmpty()) transactionToShowDetails =
+                                            income.id
+                                        else if (!selectedItems.contains(income.id)) selectedItems += income.id
+                                        else selectedItems -= income.id
+                                    },
                                     onLongClick = {
                                         if (!selectedItems.contains(income.id)) selectedItems += income.id
                                     },
@@ -383,7 +415,7 @@ fun EarningsScreen(innerPaddings: PaddingValues, viewModel: EarningsViewModel) {
             onConfirm = {
                 val income =
                     (incomes as? UiState.Success<List<Income>>)?.data?.find { it.id == incomeToDelete }
-                if (income != null) viewModel.deleteIncome(incomeToDelete)
+                if (income != null) viewModel.deleteEarning(incomeToDelete)
                 showDeleteConfirmDialog = false
             },
             onDismiss = { showDeleteConfirmDialog = false },

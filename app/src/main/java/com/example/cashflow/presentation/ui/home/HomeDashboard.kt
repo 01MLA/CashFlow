@@ -5,16 +5,15 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -51,13 +50,15 @@ fun HomeDashboard(incomes: List<Income>, expenses: List<Expense>) {
     val balance = (totalIncome - totalExpense)
     val transactions: List<Transaction> =
         (incomes + expenses).map { it }.sortedByDescending { it.date }
-
     var transactionToShowDetails: TransactionToShowDetails? by remember { mutableStateOf(null) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 85.dp) // top padding if you have TopBar or similar
+            .verticalScroll(rememberScrollState())
+            .padding(top = 88.dp, bottom = 70.dp) // top padding if you have TopBar or similar
     ) {
+        // Balance Card
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -88,7 +89,9 @@ fun HomeDashboard(incomes: List<Income>, expenses: List<Expense>) {
                 )
             }
         }
+
         Spacer(modifier = Modifier.height(12.dp))
+
         // --- Summary cards ---
         Row(
             modifier = Modifier
@@ -109,7 +112,7 @@ fun HomeDashboard(incomes: List<Income>, expenses: List<Expense>) {
                 )
                 Spacer(Modifier.height(10.dp))
                 Text(
-                    text = formatMoney(totalIncome,stringResource(R.string.currency)),
+                    text = formatMoney(totalIncome, stringResource(R.string.currency)),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
                     color = Color(0xFF2E7D32) // green
@@ -125,7 +128,7 @@ fun HomeDashboard(incomes: List<Income>, expenses: List<Expense>) {
                 )
                 Spacer(Modifier.height(10.dp))
                 Text(
-                    text = formatMoney(totalExpense,stringResource(R.string.currency)),
+                    text = formatMoney(totalExpense, stringResource(R.string.currency)),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
                     color = Color(0xFFC62828) // red
@@ -133,8 +136,6 @@ fun HomeDashboard(incomes: List<Income>, expenses: List<Expense>) {
             }
         }
 
-//        Spacer(modifier = Modifier.height(16.dp))
-//        CashFlowVerticalGroupBarChart(getFakeIncomeData(), getFakeExpenseData())
         Spacer(modifier = Modifier.height(12.dp))
 
         // Recent transactions
@@ -159,23 +160,18 @@ fun HomeDashboard(incomes: List<Income>, expenses: List<Expense>) {
             Spacer(modifier = Modifier.height(16.dp))
 
             // --- Transaction List ---
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                contentPadding = PaddingValues(bottom = 120.dp), // ✅ ensures space for BottomNav & FAB
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(transactions) { item ->
-                    CashFlowRecentItem(
-                        item = ItemModel(
-                            title = item.title,
-                            details = item.details,
-                            amount = item.amount,
-                            categoryId = item.categoryId,
-                            date = item.date
-                        ), type = item.type, onClick = {
-                            transactionToShowDetails = TransactionToShowDetails(item.id, item.type)
-                        })
-                }
+            transactions.take(10).forEach { item ->
+                CashFlowRecentItem(
+                    item = ItemModel(
+                        title = item.title,
+                        details = item.details,
+                        amount = item.amount,
+                        categoryId = item.categoryId,
+                        date = item.date
+                    ), type = item.type, onClick = {
+                        transactionToShowDetails = TransactionToShowDetails(item.id, item.type)
+                    })
+                Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }
